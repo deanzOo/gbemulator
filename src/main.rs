@@ -104,7 +104,7 @@ impl Clone for Register {
     }
 }
 
-// instruction executor function pointer type, args: cpu, condition, operand, target register, source register, is target memory
+// instruction executor function pointer type, args: cpu
 type InstructionExecutor = fn(&mut CPU);
 
 // todo add is_source_memory and use it all over
@@ -116,12 +116,13 @@ struct Instruction {
     target: Register,
     source: Register,
     is_target_memory: bool,
+    is_source_memory: bool,
     length: u8
 }
 
 impl Instruction {
-    fn new(mnemonic: String, opcode: u8, condition: ConditionType, executor: InstructionExecutor, target: Register, source: Register, is_target_memory: bool, length: u8) -> Self {
-        Self { mnemonic, opcode, condition, executor, target, source, is_target_memory, length }
+    fn new(mnemonic: String, opcode: u8, condition: ConditionType, executor: InstructionExecutor, target: Register, source: Register, is_target_memory: bool, is_source_memory: bool, length: u8) -> Self {
+        Self { mnemonic, opcode, condition, executor, target, source, is_target_memory, is_source_memory, length }
     }
 
     fn execute(&self, cpu: &mut CPU) {
@@ -131,7 +132,7 @@ impl Instruction {
 
 impl Clone for Instruction {
     fn clone(&self) -> Self {
-        Self { mnemonic: self.mnemonic.clone(), opcode: self.opcode, condition: self.condition.clone(), executor: self.executor, target: self.target.clone(), source: self.source.clone(), is_target_memory: self.is_target_memory, length: self.length }
+        Self { mnemonic: self.mnemonic.clone(), opcode: self.opcode, condition: self.condition.clone(), executor: self.executor, target: self.target.clone(), source: self.source.clone(), is_target_memory: self.is_target_memory, is_source_memory: self.is_source_memory, length: self.length }
     }
 }
 
@@ -159,63 +160,63 @@ struct CPU {
 impl CPU {
     fn new(bus: Bus) -> Self {
         let instruction_array = vec![
-            Instruction::new(String::from("NOP"), 0x00, ConditionType::None, CPU::nop, Register::None, Register::None, false, 1),
-            Instruction::new(String::from("LD BC,d16"), 0x01, ConditionType::None, CPU::ld, Register::BC, Register::D16, false, 1),
-            Instruction::new(String::from("LD (BC),A"), 0x02, ConditionType::None, CPU::ld, Register::BC, Register::A, true, 1),
-            Instruction::new(String::from("INC BC"), 0x03, ConditionType::None, CPU::inc, Register::BC, Register::None, false, 1),
-            Instruction::new(String::from("INC B"), 0x04, ConditionType::None, CPU::inc, Register::B, Register::None, false, 1),
-            Instruction::new(String::from("DEC B"), 0x05, ConditionType::None, CPU::dec, Register::B, Register::None, false, 1),
-            Instruction::new(String::from("LD B,d8"), 0x06, ConditionType::None, CPU::ld, Register::B, Register::D8, false, 2),
-            Instruction::new(String::from("RLCA"), 0x07, ConditionType::None, CPU::rlca, Register::None, Register::None, false, 1),
-            Instruction::new(String::from("LD (a16),SP"), 0x08, ConditionType::None, CPU::ld, Register::A16, Register::SP, true, 3),
-            Instruction::new(String::from("ADD HL,BC"), 0x09, ConditionType::None, CPU::add, Register::HL, Register::BC, false, 1),
-            Instruction::new(String::from("LD A,(BC)"), 0x0A, ConditionType::None, CPU::ld, Register::A, Register::BC, true, 1),
-            Instruction::new(String::from("DEC BC"), 0x0B, ConditionType::None, CPU::dec, Register::BC, Register::None, false, 1),
-            Instruction::new(String::from("INC C"), 0x0C, ConditionType::None, CPU::inc, Register::C, Register::None, false, 1),
-            Instruction::new(String::from("DEC C"), 0x0D, ConditionType::None, CPU::dec, Register::C, Register::None, false, 1),
-            Instruction::new(String::from("LD C,d8"), 0x0E, ConditionType::None, CPU::ld, Register::C, Register::D8, false, 2),
-            Instruction::new(String::from("RRCA"), 0x0F, ConditionType::None, CPU::rrca, Register::None, Register::None, false, 1),
+            Instruction::new(String::from("NOP"), 0x00, ConditionType::None, CPU::nop, Register::None, Register::None, false, false, 1),
+            Instruction::new(String::from("LD BC,d16"), 0x01, ConditionType::None, CPU::ld, Register::BC, Register::D16, false, false, 1),
+            Instruction::new(String::from("LD (BC),A"), 0x02, ConditionType::None, CPU::ld, Register::BC, Register::A, true, false, 1),
+            Instruction::new(String::from("INC BC"), 0x03, ConditionType::None, CPU::inc, Register::BC, Register::None, false, false, 1),
+            Instruction::new(String::from("INC B"), 0x04, ConditionType::None, CPU::inc, Register::B, Register::None, false, false, 1),
+            Instruction::new(String::from("DEC B"), 0x05, ConditionType::None, CPU::dec, Register::B, Register::None, false, false, 1),
+            Instruction::new(String::from("LD B,d8"), 0x06, ConditionType::None, CPU::ld, Register::B, Register::D8, false, false, 2),
+            Instruction::new(String::from("RLCA"), 0x07, ConditionType::None, CPU::rlca, Register::None, Register::None, false, false, 1),
+            Instruction::new(String::from("LD (a16),SP"), 0x08, ConditionType::None, CPU::ld, Register::A16, Register::SP, true, false, 3),
+            Instruction::new(String::from("ADD HL,BC"), 0x09, ConditionType::None, CPU::add, Register::HL, Register::BC, false, false, 1),
+            Instruction::new(String::from("LD A,(BC)"), 0x0A, ConditionType::None, CPU::ld, Register::A, Register::BC, true, false, 1),
+            Instruction::new(String::from("DEC BC"), 0x0B, ConditionType::None, CPU::dec, Register::BC, Register::None, false, false, 1),
+            Instruction::new(String::from("INC C"), 0x0C, ConditionType::None, CPU::inc, Register::C, Register::None, false, false, 1),
+            Instruction::new(String::from("DEC C"), 0x0D, ConditionType::None, CPU::dec, Register::C, Register::None, false, false, 1),
+            Instruction::new(String::from("LD C,d8"), 0x0E, ConditionType::None, CPU::ld, Register::C, Register::D8, false, false, 2),
+            Instruction::new(String::from("RRCA"), 0x0F, ConditionType::None, CPU::rrca, Register::None, Register::None, false, false, 1),
 
-            Instruction::new(String::from("STOP"), 0x10, ConditionType::None, CPU::stop, Register::None, Register::None, false, 2),
-            Instruction::new(String::from("LD DE,d16"), 0x11, ConditionType::None, CPU::ld, Register::DE, Register::D16, false, 3),
-            Instruction::new(String::from("LD (DE),A"), 0x12, ConditionType::None, CPU::ld, Register::DE, Register::A, true, 1),
-            Instruction::new(String::from("INC DE"), 0x13, ConditionType::None, CPU::inc, Register::DE, Register::None, false, 1),
-            Instruction::new(String::from("INC D"), 0x14, ConditionType::None, CPU::inc, Register::D, Register::None, false, 1),
-            Instruction::new(String::from("DEC D"), 0x15, ConditionType::None, CPU::dec, Register::D, Register::None, false, 1),
-            Instruction::new(String::from("LD D,d8"), 0x16, ConditionType::None, CPU::ld, Register::D, Register::D8, false, 2),
-            Instruction::new(String::from("RLA"), 0x17, ConditionType::None, CPU::rla, Register::None, Register::None, false, 1),
-            Instruction::new(String::from("JR r8"), 0x18, ConditionType::None, CPU::jr, Register::None, Register::None, false, 2),
-            Instruction::new(String::from("ADD HL,DE"), 0x19, ConditionType::None, CPU::add, Register::HL, Register::DE, false, 1),
+            Instruction::new(String::from("STOP"), 0x10, ConditionType::None, CPU::stop, Register::None, Register::None, false, false, 2),
+            Instruction::new(String::from("LD DE,d16"), 0x11, ConditionType::None, CPU::ld, Register::DE, Register::D16, false, false, 3),
+            Instruction::new(String::from("LD (DE),A"), 0x12, ConditionType::None, CPU::ld, Register::DE, Register::A, true, false, 1),
+            Instruction::new(String::from("INC DE"), 0x13, ConditionType::None, CPU::inc, Register::DE, Register::None, false, false, 1),
+            Instruction::new(String::from("INC D"), 0x14, ConditionType::None, CPU::inc, Register::D, Register::None, false, false, 1),
+            Instruction::new(String::from("DEC D"), 0x15, ConditionType::None, CPU::dec, Register::D, Register::None, false, false, 1),
+            Instruction::new(String::from("LD D,d8"), 0x16, ConditionType::None, CPU::ld, Register::D, Register::D8, false, false, 2),
+            Instruction::new(String::from("RLA"), 0x17, ConditionType::None, CPU::rla, Register::None, Register::None, false, false, 1),
+            Instruction::new(String::from("JR r8"), 0x18, ConditionType::None, CPU::jr, Register::None, Register::None, false, false, 2),
+            Instruction::new(String::from("ADD HL,DE"), 0x19, ConditionType::None, CPU::add, Register::HL, Register::DE, false, false, 1),
 
-            Instruction::new(String::from("JR NZ,r8"), 0x20, ConditionType::NZ, CPU::jr, Register::None, Register::None, false, 2),
-            Instruction::new(String::from("LD HL,d16"), 0x21, ConditionType::None, CPU::ld, Register::HL, Register::D16, false, 3),
-            Instruction::new(String::from("JR Z,r8"), 0x28, ConditionType::Z, CPU::jr, Register::None, Register::None, false, 2),
+            Instruction::new(String::from("JR NZ,r8"), 0x20, ConditionType::NZ, CPU::jr, Register::None, Register::None, false, false, 2),
+            Instruction::new(String::from("LD HL,d16"), 0x21, ConditionType::None, CPU::ld, Register::HL, Register::D16, false, false, 3),
+            Instruction::new(String::from("JR Z,r8"), 0x28, ConditionType::Z, CPU::jr, Register::None, Register::None, false, false, 2),
 
-            Instruction::new(String::from("LD SP,d16"), 0x31, ConditionType::None, CPU::ld, Register::SP, Register::D16, false, 3),
-            Instruction::new(String::from("LD A,d8"), 0x3E, ConditionType::None, CPU::ld, Register::A, Register::D8, false, 2),
+            Instruction::new(String::from("LD SP,d16"), 0x31, ConditionType::None, CPU::ld, Register::SP, Register::D16, false, false, 3),
+            Instruction::new(String::from("LD A,d8"), 0x3E, ConditionType::None, CPU::ld, Register::A, Register::D8, false, false, 2),
 
-            Instruction::new(String::from("LD B,A"), 0x47, ConditionType::None, CPU::ld, Register::B, Register::A, false, 1),
+            Instruction::new(String::from("LD B,A"), 0x47, ConditionType::None, CPU::ld, Register::B, Register::A, false, false, 1),
 
-            Instruction::new(String::from("LD A,B"), 0x78, ConditionType::None, CPU::ld, Register::A, Register::B, false, 1),
-            Instruction::new(String::from("LD A,H"), 0x7C, ConditionType::None, CPU::ld, Register::A, Register::H, false, 1),
-            Instruction::new(String::from("LD A,L"), 0x7D, ConditionType::None, CPU::ld, Register::A, Register::L, false, 1),
+            Instruction::new(String::from("LD A,B"), 0x78, ConditionType::None, CPU::ld, Register::A, Register::B, false, false, 1),
+            Instruction::new(String::from("LD A,H"), 0x7C, ConditionType::None, CPU::ld, Register::A, Register::H, false, false, 1),
+            Instruction::new(String::from("LD A,L"), 0x7D, ConditionType::None, CPU::ld, Register::A, Register::L, false, false, 1),
 
-            Instruction::new(String::from("XOR A"), 0xAF, ConditionType::None, CPU::xor, Register::None, Register::A, false, 1),
+            Instruction::new(String::from("XOR A"), 0xAF, ConditionType::None, CPU::xor, Register::None, Register::A, false, false, 1),
 
-            Instruction::new(String::from("OR C"), 0xB1, ConditionType::None, CPU::or, Register::None, Register::C, false, 1),
+            Instruction::new(String::from("OR C"), 0xB1, ConditionType::None, CPU::or, Register::None, Register::C, false, false, 1),
 
-            Instruction::new(String::from("JP a16"), 0xC3, ConditionType::None, CPU::jp,  Register::None, Register::None, false, 3),
-            Instruction::new(String::from("PUSH BC"), 0xC5, ConditionType::None, CPU::push, Register::None, Register::BC, false, 1),
-            Instruction::new(String::from("RET"), 0xC9, ConditionType::None, CPU::ret, Register::None, Register::None, false, 1),
-            Instruction::new(String::from("CALL a16"), 0xCD, ConditionType::None, CPU::call,  Register::A16, Register::None, false, 3),
+            Instruction::new(String::from("JP a16"), 0xC3, ConditionType::None, CPU::jp,  Register::None, Register::None, false, false, 3),
+            Instruction::new(String::from("PUSH BC"), 0xC5, ConditionType::None, CPU::push, Register::None, Register::BC, false, false, 1),
+            Instruction::new(String::from("RET"), 0xC9, ConditionType::None, CPU::ret, Register::None, Register::None, false, false, 1),
+            Instruction::new(String::from("CALL a16"), 0xCD, ConditionType::None, CPU::call,  Register::A16, Register::None, false, false, 3),
 
-            Instruction::new(String::from("LDH (a8),A"), 0xE0, ConditionType::None, CPU::ld, Register::A8, Register::A, true, 2),
-            Instruction::new(String::from("LD (a16),A"), 0xEA, ConditionType::None, CPU::ld, Register::A16, Register::A, true, 3),
+            Instruction::new(String::from("LDH (a8),A"), 0xE0, ConditionType::None, CPU::ld, Register::A8, Register::A, true, false, 2),
+            Instruction::new(String::from("LD (a16),A"), 0xEA, ConditionType::None, CPU::ld, Register::A16, Register::A, true, false, 3),
 
-            Instruction::new(String::from("LDH, A,(a8)"), 0xF0, ConditionType::None, CPU::ld, Register::A, Register::A8, true, 2),
-            Instruction::new(String::from("DI"), 0xF3, ConditionType::None, CPU::di, Register::None, Register::None, false, 1),
-            Instruction::new(String::from("PUSH AF"), 0xF5, ConditionType::None, CPU::push, Register::None, Register::AF, false, 1),
-            Instruction::new(String::from("CP d8"), 0xFE, ConditionType::None, CPU::cp, Register::None, Register::PC, false, 2)
+            Instruction::new(String::from("LDH, A,(a8)"), 0xF0, ConditionType::None, CPU::ld, Register::A, Register::A8, true, true, 2),
+            Instruction::new(String::from("DI"), 0xF3, ConditionType::None, CPU::di, Register::None, Register::None, false, false, 1),
+            Instruction::new(String::from("PUSH AF"), 0xF5, ConditionType::None, CPU::push, Register::None, Register::AF, false, false, 1),
+            Instruction::new(String::from("CP d8"), 0xFE, ConditionType::None, CPU::cp, Register::None, Register::PC, false, false, 2)
         ];
         let instruction_set: HashMap<u8, Instruction> = instruction_array
             .into_iter()
@@ -223,7 +224,7 @@ impl CPU {
             .collect();
 
         let cb_instruction_array = vec![
-            Instruction::new(String::from("RES 0,A"), 0x87, ConditionType::None, CPU::res, Register::A00, Register::A, false, 2)
+            Instruction::new(String::from("RES 0,A"), 0x87, ConditionType::None, CPU::res, Register::A00, Register::A, false, false, 2)
         ];
         let cb_instruction_set: HashMap<u8, Instruction> = cb_instruction_array
             .into_iter()
@@ -244,7 +245,7 @@ impl CPU {
             bus,
             instruction_set,
             cb_instruction_set,
-            curr_instruction: Instruction::new(String::from("INVALID"), 0xD3, ConditionType::None, CPU::invalid,  Register::None, Register::None, false, 0),
+            curr_instruction: Instruction::new(String::from("INVALID"), 0xD3, ConditionType::None, CPU::invalid,  Register::None, Register::None, false, false, 0),
             ime: true,
             running: true
         }
@@ -280,6 +281,11 @@ impl CPU {
     fn write_byte(&mut self, address: u16, value: u8) {
         self.cycle_count += 4;
         self.bus.write_byte(address, value);
+    }
+
+    fn write_word(&mut self, address: u16, value: u16) {
+        self.write_byte(address, (value & 0xFF) as u8);
+        self.write_byte(address + 1, ((value >> 8) & 0xFF) as u8);
     }
 
     fn fetch_next_instruction(&mut self) {
@@ -318,14 +324,6 @@ impl CPU {
         self.pc = value;
     }
 
-    fn run_for(&mut self, cycles: u32) {
-        for _ in 0..cycles {
-            self.fetch_next_instruction();
-            self.print_debug();
-            self.execute();
-        }
-    }
-
     fn set_z_flag(&mut self, value: bool) {
         if value {
             self.f |= 0x80;
@@ -356,6 +354,10 @@ impl CPU {
         } else {
             self.f &= 0xBF;
         }
+    }
+
+    fn get_af(&mut self) -> u16 {
+        ((self.a as u16) << 8) | (self.f as u16)
     }
 
     fn get_bc(&mut self) -> u16 {
@@ -447,12 +449,12 @@ impl CPU {
     }
 
     fn cp(&mut self) {
-        let result: u8;
+        let (result, overflowed) = (0, false);
         let operand: u8;
         match self.curr_instruction.source {
             Register::PC => {
                 operand = self.read_byte_at_pc();
-                result = self.a.wrapping_sub(operand);
+                (result, overflowed) = self.a.overflowing_sub(operand);
             },
             _ => { panic!("Unknown source register for CP instruction"); }
         }
@@ -460,7 +462,7 @@ impl CPU {
         self.set_z_flag(result == 0);
         self.set_n_flag(true);
         self.set_h_flag((self.a & 0x0F) < (operand & 0x0F));
-        self.set_c_flag(result > self.a);
+        self.set_c_flag(overflowed);
     }
 
     fn jr(&mut self) {
@@ -517,77 +519,78 @@ impl CPU {
         let target = self.curr_instruction.target.clone();
         let source = self.curr_instruction.source.clone();
         let is_target_memory = self.curr_instruction.is_target_memory;
-        match (target, source, is_target_memory) {
-            (Register::BC, Register::A, true) => {
+        let is_source_memory = self.curr_instruction.is_source_memory;
+        match (target, source, is_target_memory, is_source_memory) {
+            (Register::BC, Register::A, true, _) => {
                 let address = ((self.b as u16) << 8) | (self.c as u16);
                 self.write_byte(address, self.a);
             },
-            (Register::BC, Register::D16, false) => {
+            (Register::BC, Register::D16, false, _) => {
                 let operand = self.read_word_at_pc();
                 self.b = (operand >> 8) as u8;
                 self.c = operand as u8;
             },
-            (Register::A, Register::D8, _) => {
+            (Register::A, Register::D8, _, _) => {
                 self.a = self.read_byte_at_pc();
             },
-            (Register::A16, Register::A, _) => {
+            (Register::A16, Register::A, _, _) => {
                 let operand = self.read_word_at_pc();
                 self.write_byte(operand, self.a);
             },
-            (Register::A8, Register::A, _) => {
+            (Register::A8, Register::A, _, _) => {
                 let operand = self.read_byte_at_pc();
                 self.write_byte(0xFF00 + (operand as u16), self.a);
             },
-            (Register::A, Register::A8, _) => {
+            (Register::A, Register::A8, _, true) => {
                 let operand = self.read_byte_at_pc();
                 self.a = self.read_byte(0xFF00 + (operand as u16));
             },
-            (Register::B, Register::A, _) => {
+            (Register::B, Register::A, _, _) => {
                 self.b = self.a;
             },
-            (Register::SP, Register::D16, _) => {
+            (Register::SP, Register::D16, _, _) => {
                 let operand = self.read_word_at_pc();
                 self.sp = operand;
             },
-            (Register::HL, Register::D16, _) => {
+            (Register::HL, Register::D16, _, _) => {
                 let operand = self.read_word_at_pc();
                 self.h = (operand >> 8) as u8;
                 self.l = operand as u8;
             },
-            (Register::A, Register::L, _) => {
+            (Register::A, Register::L, _, _) => {
                 self.a = self.l;
             },
-            (Register::A, Register::H, _) => {
+            (Register::A, Register::H, _, _) => {
                 self.a = self.h;
             },
-            (Register::A, Register::B, _) => {
+            (Register::A, Register::B, _, _) => {
                 self.a = self.b;
             },
-            (Register::B, Register::D8, _) => {
+            (Register::B, Register::D8, _, _) => {
                 self.b = self.read_byte_at_pc();
             },
-            (Register::A16, Register::SP, true) => {
+            (Register::A16, Register::SP, true, _) => {
                 let operand = self.read_word_at_pc();
                 self.write_byte(operand, (self.sp & 0xFF) as u8);
                 self.write_byte(operand + 1, ((self.sp >> 8) & 0xFF) as u8);
             },
-            (Register::A, Register::BC, true) => {
+            (Register::A, Register::BC, true, _) => {
                 let address = ((self.b as u16) << 8) | (self.c as u16);
                 self.a = self.read_byte(address);
             },
-            (Register::C, Register::D8, _) => {
+            (Register::C, Register::D8, _, _) => {
                 self.c = self.read_byte_at_pc();
             },
-            (Register::DE, Register::D16, false) => {
+            (Register::DE, Register::D16, false, _) => {
                 let operand = self.read_word_at_pc();
                 self.d = (operand >> 8) as u8;
                 self.e = operand as u8;
             },
-            (Register::DE, Register::A, true) => {
+            (Register::DE, Register::A, true, _) => {
                 let address = ((self.d as u16) << 8) | (self.e as u16);
                 self.write_byte(address, self.a);
             },
-            (Register::D, Register::D8, _) => {
+            (Register::D, Register::D8, _, _) => {
                 self.d = self.read_byte_at_pc();
             },
             _ => { panic!("Unknown target/source register combination for LD instruction"); }
@@ -660,10 +663,9 @@ impl CPU {
     fn ret(&mut self) {
         let condition = self.curr_instruction.condition.clone();
         if self.check_condition(condition) {
-            let low = self.read_byte(self.sp);
-            let high = self.read_byte(self.sp + 1);
+            let val = self.read_word(self.sp);
             self.sp += 2;
-            self.set_pc(((high as u16) << 8) | (low as u16));
+            self.set_pc(val);
         } else {
             // do nothing
         }
@@ -671,22 +673,14 @@ impl CPU {
 
     fn push(&mut self) {
         let source = self.curr_instruction.source.clone();
-        let first_byte: u8;
-        let second_byte: u8;
+        let data: u16;
         match source {
-            Register::AF => {
-                first_byte = self.a;
-                second_byte = self.f;
-            },
-            Register::BC => {
-                first_byte = self.b;
-                second_byte = self.c;
-            },
+            Register::AF => { data = self.get_af() },
+            Register::BC => { data = self.get_bc() },
             _ => { panic!("Unknown source register for PUSH instruction"); }
         }
-        self.write_byte(self.sp - 1, first_byte);
-        self.write_byte(self.sp - 2, second_byte);
         self.sp -= 2;
+        self.write_word(self.sp, data);
     }
 
     fn or(&mut self) {
@@ -716,17 +710,18 @@ impl CPU {
         let target = self.curr_instruction.target.clone();
         let source = self.curr_instruction.source.clone();
         let result: u16;
+        let overflowed: bool;
         match (target, source) {
             (Register::HL, Register::BC) => {
                 let hl = self.get_hl();
                 let bc = self.get_bc();
-                result = hl.wrapping_add(bc);
+                (result, overflowed) = hl.overflowing_add(bc);
                 self.set_hl(result);
             },
             (Register::HL, Register::DE) => {
                 let hl = self.get_hl();
                 let de = self.get_de();
-                result = hl.wrapping_add(de);
+                (result, overflowed) = hl.overflowing_add(de);
                 self.set_hl(result);
             },
             _ => { panic!("Unknown target/source register combination for ADD instruction"); }
@@ -735,7 +730,7 @@ impl CPU {
         self.set_z_flag(result == 0);
         self.set_n_flag(false);
         self.set_h_flag((result & 0x0FFF) < (self.h as u16));
-        self.set_c_flag(result > 0xFFFF);
+        self.set_c_flag(overflowed);
     }
 
     fn rrca(&mut self) {
