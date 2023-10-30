@@ -69,6 +69,8 @@ enum Register {
     BC,
     DE,
     HL,
+    HLI,
+    HLD,
     SP,
     PC,
     A8,
@@ -93,6 +95,8 @@ impl Clone for Register {
             Self::BC => Self::BC,
             Self::DE => Self::DE,
             Self::HL => Self::HL,
+            Self::HLI => Self::HLI,
+            Self::HLD => Self::HLD,
             Self::SP => Self::SP,
             Self::PC => Self::PC,
             Self::A8 => Self::A8,
@@ -187,6 +191,12 @@ impl CPU {
             Instruction::new(String::from("RLA"), 0x17, ConditionType::None, CPU::rla, Register::None, Register::None, false, false, 1),
             Instruction::new(String::from("JR r8"), 0x18, ConditionType::None, CPU::jr, Register::None, Register::None, false, false, 2),
             Instruction::new(String::from("ADD HL,DE"), 0x19, ConditionType::None, CPU::add, Register::HL, Register::DE, false, false, 1),
+            Instruction::new(String::from("LD A,(DE)"), 0x1A, ConditionType::None, CPU::ld, Register::A, Register::DE, false, true, 1),
+            Instruction::new(String::from("DEC DE"), 0x1B, ConditionType::None, CPU::dec, Register::DE, Register::None, false, false, 1),
+            Instruction::new(String::from("INC E"), 0x1C, ConditionType::None, CPU::inc, Register::E, Register::None, false, false, 1),
+            Instruction::new(String::from("DEC E"), 0x1D, ConditionType::None, CPU::dec, Register::E, Register::None, false, false, 1),
+            Instruction::new(String::from("LD E,d8"), 0x1E, ConditionType::None, CPU::ld, Register::E, Register::D8, false, true, 2),
+            Instruction::new(String::from("RRA"), 0x1F, ConditionType::None, CPU::rra, Register::None, Register::None, false, false, 1),
 
             Instruction::new(String::from("JR NZ,r8"), 0x20, ConditionType::NZ, CPU::jr, Register::None, Register::None, false, false, 2),
             Instruction::new(String::from("LD HL,d16"), 0x21, ConditionType::None, CPU::ld, Register::HL, Register::D16, false, false, 3),
@@ -507,6 +517,10 @@ impl CPU {
                 self.d = self.d.wrapping_sub(1);
                 result = self.d as u16;
             },
+            Register::E => {
+                self.e = self.e.wrapping_sub(1);
+                result = self.e as u16;
+            },
             _ => { panic!("Unknown target register for DEC instruction"); }
         }
         // Z 1 H -
@@ -593,6 +607,21 @@ impl CPU {
             (Register::D, Register::D8, _, _) => {
                 self.d = self.read_byte_at_pc();
             },
+            (Register::A, Register::DE, _, true) => {
+                let address = self.get_de();
+                let val = self.read_byte(address);
+                self.a = val;
+            },
+            (Register::A, Register::HLI, _, _) => {
+                let address = self.get_hl();
+                self.a = self.read_byte(address);
+                self.set_hl(address + 1);
+            },
+            (Register::E, Register::D8, _, true) => {
+                let operand = self.read_byte_at_pc();
+                let address = 0xFF00 + (operand as u16);
+                self.e = self.read_byte(address);
+            },
             _ => { panic!("Unknown target/source register combination for LD instruction"); }
         }
     }
@@ -652,6 +681,10 @@ impl CPU {
                 self.d = self.d.wrapping_add(1);
                 result = self.d as u16;
             },
+            Register::E => {
+                self.e = self.e.wrapping_add(1);
+                result = self.e as u16;
+            },
             _ => { panic!("Unknown target register for INC instruction"); }
         }
         // Z 0 H -
@@ -709,8 +742,7 @@ impl CPU {
     fn add(&mut self) {
         let target = self.curr_instruction.target.clone();
         let source = self.curr_instruction.source.clone();
-        let result: u16;
-        let overflowed: bool;
+        let (result, overflowed);
         match (target, source) {
             (Register::HL, Register::BC) => {
                 let hl = self.get_hl();
@@ -754,6 +786,18 @@ impl CPU {
         self.a <<= 1;
         if (self.f & 0x10) == 0x10 {
             self.a |= 0x01;
+        }
+        self.set_z_flag(self.a == 0);
+        self.set_n_flag(false);
+        self.set_h_flag(false);
+        self.set_c_flag(carry);
+    }
+
+    fn rra(&mut self) {
+        let carry = (self.a & 0x01) == 0x01;
+        self.a >>= 1;
+        if (self.f & 0x10) == 0x10 {
+            self.a |= 0x80;
         }
         self.set_z_flag(self.a == 0);
         self.set_n_flag(false);
