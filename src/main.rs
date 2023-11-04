@@ -3,7 +3,8 @@ mod bus;
 mod cpu;
 
 mod instructions_loader;
-mod instruction_impl;
+mod instruction_factory;
+mod lr35902_instructions_impl;
 
 use crate::cpu::CPU;
 

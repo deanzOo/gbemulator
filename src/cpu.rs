@@ -1,6 +1,6 @@
 
 use std::collections::HashMap;
-use crate::instruction_impl::{InstructionImpl, load_instructions};
+use crate::instruction_factory::{InstructionImpl, load_instructions};
 use crate::bus::Bus;
 use crate::rom::Rom;
 

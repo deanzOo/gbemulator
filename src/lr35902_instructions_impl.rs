@@ -1,34 +1,9 @@
 use std::collections::HashMap;
-use crate::{CPU};
-use crate::instructions_loader::{Instruction, instructions_from_json};
+use crate::cpu::CPU;
+use crate::instruction_factory::InstructionImpl;
+use crate::instructions_loader::instructions_from_json;
 
-
-// instruction executor function pointer type, args: cpu
-type InstructionExecutor = fn(&mut CPU);
-
-pub struct InstructionImpl {
-    pub(crate) instruction: Instruction,
-    pub(crate) executor: InstructionExecutor
-}
-
-impl InstructionImpl {
-    fn new(instruction: Instruction, executor: InstructionExecutor) -> Self {
-        Self {
-            instruction,
-            executor
-        }
-    }
-}
-
-pub fn load_instructions(cpu_type: String) -> (HashMap<u8, InstructionImpl>, HashMap<u8, InstructionImpl>) {
-    if cpu_type == "LR35902" {
-        return load_lr35902_instructions();
-    } else {
-        panic!("Invalid CPU type");
-    }
-}
-
-fn load_lr35902_instructions() -> (HashMap<u8, InstructionImpl>, HashMap<u8, InstructionImpl>) {
+pub fn load_lr35902_instructions() -> (HashMap<u8, InstructionImpl>, HashMap<u8, InstructionImpl>) {
     let mut instruction_set = instructions_from_json(String::from("D:\\Dev\\gbemulator\\src\\LR35902_instructions.json"));
     // let mut cb_instruction_set = instructions_from_json(String::from("LR35902_cb_instructions.json"));
 
