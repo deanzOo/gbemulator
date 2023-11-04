@@ -2,10 +2,11 @@
 use std::collections::HashMap;
 use crate::instruction_impl::{InstructionImpl, load_instructions};
 use crate::bus::Bus;
+use crate::rom::Rom;
 
 pub struct CPU {
-    // GameBoy CPU registers
-    pub(crate) a: u8,
+    // LR35902 CPU
+    a: u8,
     f: u8,
     b: u8,
     c: u8,
@@ -13,20 +14,22 @@ pub struct CPU {
     e: u8,
     h: u8,
     l: u8,
-    pub(crate) sp: u16,
+    sp: u16,
     pc: u16,
     cycle_count: u32,
     bus: Bus,
     instruction_set: HashMap<u8, InstructionImpl>,
     cb_instruction_set: HashMap<u8, InstructionImpl>,
     curr_opcode: u8,
-    pub(crate) ime: bool,
+    ime: bool,
     running: bool
 }
 
 impl CPU {
-    pub(crate) fn new(bus: Bus) -> Self {
-        let (instruction_impls, cb_instruction_impls) = load_instructions();
+    pub(crate) fn new(filepath: String, cpu_type: String) -> Self {
+        let rom = Rom::new(filepath);
+        let bus = Bus::new(rom);
+        let (instruction_impls, cb_instruction_impls) = load_instructions(cpu_type);
 
         let first_pc = 0x100;
         let mut first_opcode = bus.read_byte(first_pc);
@@ -110,6 +113,10 @@ impl CPU {
         }
     }
 
+    pub(crate) fn set_ime(&mut self, value: bool) {
+        self.ime = value;
+    }
+
     pub(crate) fn set_pc(&mut self, value: u16) {
         self.cycle_count += 4;
         self.pc = value;
@@ -161,6 +168,22 @@ impl CPU {
         } else {
             self.f &= 0xBF;
         }
+    }
+
+    pub(crate) fn get_a(&mut self) -> u8 {
+        self.a
+    }
+
+    fn set_a(&mut self, value: u8) {
+        self.a = value;
+    }
+
+    fn get_sp(&mut self) -> u16 {
+        self.sp
+    }
+
+    pub(crate) fn set_sp(&mut self, value: u16) {
+        self.sp = value;
     }
 
     fn get_af(&mut self) -> u16 {

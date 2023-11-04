@@ -12,19 +12,19 @@
       "c": "-"
     }
   },
+  {
+    "opcode": 1,
+    "mnemonic": "LD BC,nn",
+    "length": 3,
+    "cycles": "12",
+    "flags":
     {
-        "opcode": 1,
-        "mnemonic": "LD BC,nn",
-        "length": 3,
-        "cycles": "12",
-        "flags":
-        {
-        "z": "-",
-        "n": "-",
-        "h": "-",
-        "c": "-"
-        }
-    },
+      "z": "-",
+      "n": "-",
+      "h": "-",
+      "c": "-"
+    }
+  },
   {
     "opcode": 2,
     "mnemonic": "LD (BC),A",
@@ -207,7 +207,6 @@
       "c": "c"
     }
   },
-
   {
     "opcode": 49,
     "mnemonic": "LD SP,d16",
@@ -221,7 +220,6 @@
       "c": "-"
     }
   },
-
   {
     "opcode": 195,
     "mnemonic": "JP a16",
@@ -235,7 +233,6 @@
       "c": "-"
     }
   },
-
   {
     "opcode": 234,
     "mnemonic": "LD (a16),A",
@@ -249,7 +246,6 @@
       "c": "-"
     }
   },
-
   {
     "opcode": 243,
     "mnemonic": "DI",

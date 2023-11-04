@@ -6,14 +6,9 @@ mod instructions_loader;
 mod instruction_impl;
 
 use crate::cpu::CPU;
-use crate::rom::Rom;
-use crate::bus::Bus;
-
 
 fn main() {
-    let rom = Rom::new(String::from("roms/cpu_instrs.gb"));
-    let bus = Bus::new(rom);
-    let mut cpu = CPU::new(bus);
+    let mut cpu = CPU::new(String::from("roms/cpu_instrs.gb"), String::from("LR35902"));
 
     cpu.run();
 }
