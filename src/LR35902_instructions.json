@@ -1,0 +1,266 @@
+[
+  {
+    "opcode": 0,
+    "mnemonic": "NOP",
+    "length": 1,
+    "cycles": "4",
+    "flags":
+    {
+      "z": "-",
+      "n": "-",
+      "h": "-",
+      "c": "-"
+    }
+  },
+    {
+        "opcode": 1,
+        "mnemonic": "LD BC,nn",
+        "length": 3,
+        "cycles": "12",
+        "flags":
+        {
+        "z": "-",
+        "n": "-",
+        "h": "-",
+        "c": "-"
+        }
+    },
+  {
+    "opcode": 2,
+    "mnemonic": "LD (BC),A",
+    "length": 1,
+    "cycles": "8",
+    "flags":
+    {
+      "z": "-",
+      "n": "-",
+      "h": "-",
+      "c": "-"
+    }
+  },
+  {
+    "opcode": 3,
+    "mnemonic": "INC BC",
+    "length": 1,
+    "cycles": "8",
+    "flags":
+    {
+      "z": "-",
+      "n": "-",
+      "h": "-",
+      "c": "-"
+    }
+  },
+  {
+    "opcode": 4,
+    "mnemonic": "INC B",
+    "length": 1,
+    "cycles": "4",
+    "flags":
+    {
+      "z": "z",
+      "n": "0",
+      "h": "h",
+      "c": "-"
+    }
+  },
+  {
+    "opcode": 5,
+    "mnemonic": "DEC B",
+    "length": 1,
+    "cycles": "4",
+    "flags":
+    {
+      "z": "z",
+      "n": "1",
+      "h": "h",
+      "c": "-"
+    }
+  },
+  {
+    "opcode": 6,
+    "mnemonic": "LD B,n",
+    "length": 2,
+    "cycles": "8",
+    "flags":
+    {
+      "z": "-",
+      "n": "-",
+      "h": "-",
+      "c": "-"
+    }
+  },
+  {
+    "opcode": 7,
+    "mnemonic": "RLCA",
+    "length": 1,
+    "cycles": "4",
+    "flags":
+    {
+      "z": "0",
+      "n": "0",
+      "h": "0",
+      "c": "c"
+    }
+  },
+  {
+    "opcode": 8,
+    "mnemonic": "LD (nn),SP",
+    "length": 3,
+    "cycles": "20",
+    "flags":
+    {
+      "z": "-",
+      "n": "-",
+      "h": "-",
+      "c": "-"
+    }
+  },
+  {
+    "opcode": 9,
+    "mnemonic": "ADD HL,BC",
+    "length": 1,
+    "cycles": "8",
+    "flags":
+    {
+      "z": "-",
+      "n": "0",
+      "h": "h",
+      "c": "c"
+    }
+  },
+  {
+    "opcode": 10,
+    "mnemonic": "LD A,(BC)",
+    "length": 1,
+    "cycles": "8",
+    "flags":
+    {
+      "z": "-",
+      "n": "-",
+      "h": "-",
+      "c": "-"
+    }
+  },
+  {
+    "opcode": 11,
+    "mnemonic": "DEC BC",
+    "length": 1,
+    "cycles": "8",
+    "flags":
+    {
+      "z": "-",
+      "n": "-",
+      "h": "-",
+      "c": "-"
+    }
+  },
+  {
+    "opcode": 12,
+    "mnemonic": "INC C",
+    "length": 1,
+    "cycles": "4",
+    "flags":
+    {
+      "z": "z",
+      "n": "0",
+      "h": "h",
+      "c": "-"
+    }
+  },
+  {
+    "opcode": 13,
+    "mnemonic": "DEC C",
+    "length": 1,
+    "cycles": "4",
+    "flags":
+    {
+      "z": "z",
+      "n": "1",
+      "h": "h",
+      "c": "-"
+    }
+  },
+  {
+    "opcode": 14,
+    "mnemonic": "LD C,n",
+    "length": 2,
+    "cycles": "8",
+    "flags":
+    {
+      "z": "-",
+      "n": "-",
+      "h": "-",
+      "c": "-"
+    }
+  },
+  {
+    "opcode": 15,
+    "mnemonic": "RRCA",
+    "length": 1,
+    "cycles": "4",
+    "flags":
+    {
+      "z": "0",
+      "n": "0",
+      "h": "0",
+      "c": "c"
+    }
+  },
+
+  {
+    "opcode": 49,
+    "mnemonic": "LD SP,d16",
+    "length": 3,
+    "cycles": "12",
+    "flags":
+    {
+      "z": "-",
+      "n": "-",
+      "h": "-",
+      "c": "-"
+    }
+  },
+
+  {
+    "opcode": 195,
+    "mnemonic": "JP a16",
+    "length": 3,
+    "cycles": "16",
+    "flags":
+    {
+      "z": "-",
+      "n": "-",
+      "h": "-",
+      "c": "-"
+    }
+  },
+
+  {
+    "opcode": 234,
+    "mnemonic": "LD (a16),A",
+    "length": 3,
+    "cycles": "16",
+    "flags":
+    {
+      "z": "-",
+      "n": "-",
+      "h": "-",
+      "c": "-"
+    }
+  },
+
+  {
+    "opcode": 243,
+    "mnemonic": "DI",
+    "length": 1,
+    "cycles": "4",
+    "flags":
+    {
+      "z": "-",
+      "n": "-",
+      "h": "-",
+      "c": "-"
+    }
+  }
+]
