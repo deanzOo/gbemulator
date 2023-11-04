@@ -82,12 +82,12 @@ impl Instruction {
     }
 }
 
-pub fn instructions_from_json(filepath: String) -> HashMap<u8, Instruction> {
+pub fn instructions_from_yaml(filepath: String) -> HashMap<u8, Instruction> {
     let mut file = File::open(filepath).expect("Failed to open file");
-    let mut json_data = String::new();
-    file.read_to_string(&mut json_data).expect("Failed to read file");
+    let mut yaml_data = String::new();
+    file.read_to_string(&mut yaml_data).expect("Failed to read file");
 
-    let instructions: Result<Vec<Instruction>, serde_json::Error> = serde_json::from_str(&json_data);
+    let instructions: Result<Vec<Instruction>, serde_yaml::Error> = serde_yaml::from_str(&yaml_data);
 
     match instructions {
         Ok(instructions) => {
@@ -97,6 +97,6 @@ pub fn instructions_from_json(filepath: String) -> HashMap<u8, Instruction> {
             }
             instructions_map
         },
-        Err(e) => panic!("Error parsing JSON: {}", e)
+        Err(e) => panic!("Error parsing YAML: {}", e)
     }
 }

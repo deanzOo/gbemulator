@@ -3,7 +3,6 @@ use crate::{CPU};
 use crate::instructions_loader::Instruction;
 use crate::lr35902_instructions_impl::load_lr35902_instructions;
 
-
 // instruction executor function pointer type, args: cpu
 type InstructionExecutor = fn(&mut CPU);
 

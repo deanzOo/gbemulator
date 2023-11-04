@@ -138,6 +138,11 @@ impl CPU {
         (self.f & 0x10) == 0x10
     }
 
+
+    pub(crate) fn get_z_flag(&mut self) -> bool {
+        (self.f & 0x80) == 0x80
+    }
+
     fn set_z_flag(&mut self, value: bool) {
         if value {
             self.f |= 0x80;
